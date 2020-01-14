@@ -1,0 +1,449 @@
+#+TITLE:  Org-Tufte Readme
+#+AUTHOR: matheuristic
+#+DATE: January 12, 2020
+#+LATEX_CLASS: tufte-handout
+
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:{} arch:headline
+#+OPTIONS: author:t c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:nil
+#+OPTIONS: tags:t tasks:nil tex:t timestamp:nil title:nil toc:nil todo:t |:t
+
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+STARTUP: noinlineimages
+#+STARTUP: entitiespretty
+
+#+MACRO: newthought \newthought{$1}
+#+MACRO: sidenote \sidenote[$3][$2]{$1}
+#+MACRO: marginnote \marginnote[$2]{$1}
+
+# Configure the margin note font (see front matter heading)
+#+MARGIN-NOTE-FONT: \itshape\footnotesize
+
+# The configuration below uses a TeX font derived from Cardo that is similar to Bembo
+#+LATEX_HEADER: \usepackage[p,osf]{fbb}
+
+# Uncomment below lines to reduce the vertical separation between list items
+# #+LATEX_HEADER: \usepackage{enumitem}
+# #+LATEX_HEADER: \setlist[itemize]{noitemsep}
+
+#+LATEX_HEADER: \usepackage{booktabs,graphicx,microtype,hyphenat,amsmath}
+#+LATEX_HEADER: \geometry{paperheight=10.5in,paperwidth=8.5in,textwidth=4.375in}
+#+LATEX_HEADER: \titleformat{\part}[display]{\relax\itshape\huge}{}{0pt}{\huge\rmfamily\itshape}[]
+
+# Use BibLaTeX for bibliographies and add BibTex bibliography file (modify filename as needed)
+#+LATEX_HEADER: \usepackage[backend=biber,style=verbose-trad1]{biblatex}
+#+LATEX_HEADER: \addbibresource{tufte.bib}
+
+* Front Matter                                                     :ignore:
+
+#+NAME: tufte-latex-handout-settings
+#+HEADER: :var marginnote-font=(tufte-latex-org-kwd "MARGIN-NOTE-FONT")
+#+HEADER: :results raw :exports results
+#+begin_src emacs-lisp
+(format "\\setmarginnotefont{%s}" marginnote-font)
+#+end_src
+
+#+LATEX: \maketitle
+
+* Introduction
+
+This README covers several aspects of using Org documents for
+compilation to Tufte-style books and handouts
+via LaTeX and the Tufte-LaTeX package.
+
+The source for this README document is good reference for how to set up and write
+an Org document to be exported to a Tufte-style handout.
+
+An additional two template files are provided as a basis for Org documents
+to be compiled to a Tufte-style book and handout respectively.
+
+Much of the source here and documentation are adapted from a few sources:
+documentation and source for the ~tufte-org-mode~ project [[tufte-ebib:tufte-org-mode]] on Github,
+documentation for the ~tufte-latex~ project [[tufte-ebib:tufte-latex]] on Github (and CTAN),
+and discussion on StackExchange [[tufte-ebib:tex-stackexchange-45934]]
+about using
+#+LATEX: {\sc{Bib}\LaTeX}
+with ~tufte-latex~ classes in LaTeX.
+
+* Install Notes
+
+** Install TeX packages
+
+Install required TeX packages from CTAN.
+
+#+begin_src bash
+tlmgr install \
+      changepage fancyhdr geometry hyperref natbib \
+      paralist placeins ragged2e setspace textcase \
+      titlesec xcolor xifthen bera psnfss oberdiek \
+      iftex microtype mathpazo soul etex etexcmds \
+      biblatex booktabs graphics hyphenat marginfix \
+      amsmath morefloats l3packages xpatch hycolor \
+      pdfescape letltxmacro ltxcmds kvsetkeys \
+      kvdefinekeys bigintcalc intcalc atbegshi \
+      atveryend bitset rerunfilecheck epstopdf-pkg \
+      uniquecounter refcount gettitlestring \
+      hardwrap xltxtra realscripts \
+      fbb tufte-latex
+#+end_src
+
+** Install Emacs package
+
+The Emacs package at https://github.com/tsdye/tufte-org-mode needs to be installed,
+and the directory containing ~ox-tufte-latex.el~ file be in the Emacs ~load-path~
+variable (see [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][documentation]]).
+
+* Template Documents
+
+There are two template documents, one for compiling to handouts (~tufte-handout-template.org~),
+and another for compiling to books (~tufte-book-template.org~).
+
+* Compile Notes
+
+The Org Tufte documents can be compiled to PDF by calling
+#+LATEX: \linebreak
+~org-export-dispatch~  and exporting to Tufte LaTeX format
+(i.e., ~C-c C-e T~ followed by the key corresponding to the target output location).
+
+* Tufte Handout Document 
+
+{{{newthought(These are handout documents)}}} that simulate the layout in Tufte's handouts.
+
+** Document Structure
+
+Handouts only have sections and subsections.
+The output PDF file has continuous flow, i.e. no section or subsection begins on a new page.
+
+** Heading Structure
+
+Tufte handout documents have the heading levels: sections, subsections and paragraphs.
+(It does not have parts and chapters like Tufte books.)
+Sub-subsections and subparagraphs are not defined by default.
+
+From an Org-mode perspective, it only supports three heading levels.
+Heading levels more than three deep are treated as numbered lists.
+
+* Tufte Book Documents
+
+{{{newthought(These are book documents)}}} that simulate the layout in Tufte's books.
+
+** Document Structure
+
+Books have a title page, contents page, book parts and chapters within those book parts.
+The output PDF file is assembled such that the title page, contents page, each parts page, and the first page of each chapter begins on an odd-numbered page.
+
+** Heading Structure
+
+The heading structure of Tufte’s books has the heading levels: parts, chapters, sections, subsections and paragraphs.
+
+Sub-subsections and subparagraphs are not defined by default and when used will throw an error when compiling the LaTeX output to PDF.
+
+From an Org-mode perspective, it only supports four heading levels.
+Heading levels more than four deep are treated as numbered lists and sublists.
+
+* Wide text
+
+To have text extend into the margin, use the ~fullwidth~ environment.
+
+#+begin_fullwidth
+Some really, really, really, really, really, really, really, really, really  long text that you want to run into the margin.
+#+end_fullwidth
+
+* Tables
+
+{{{newthought(There are three types)}}} of supported table placements.
+These are within the text body, within the margin and across the page.
+
+** Text Body Table
+
+Here is an example of a table situated in the text body.
+
+#+name: tab:text-body
+#+caption[Example in-text table]: Example table in the text.
+#+caption: Note that the caption is placed in the margin.
+#+attr_latex: :font \footnotesize
+| First | Second | Third | Fourth | Fifth | Sixth |
+|-------+--------+-------+--------+-------+-------|
+| A     | B      | C     | D      | E     | F     |
+| G     | H      | I     | J      | K     | L     |
+
+** Margin Table
+
+Here is an example of a table situated in the margin.
+We can control the offset to situate the margin table accordingly.
+
+#+name: tab:marginal
+#+caption[Example marginal table]: Example marginal table.
+#+caption: Note that the table and the caption are placed in the margin.
+#+attr_latex: :booktabs nil :font \footnotesize :float margin :offset -0.75in
+| First | Second | Third |
+|-------+--------+-------|
+| A     | B      | C     |
+| D     | E      | F     |
+
+** Full-width Table
+
+Here is an example of a table that is centered on the page,
+that is allowed to span up to the full width of the page.
+Note that when the automatic caption placement can be suboptimal,
+so it can be better to define an offset for it as is done in this example.
+
+#+name: tab:full-width
+#+caption[Example full width table][0.2in]: Example full width table.
+#+caption: Note that the caption is placed in the margin.
+#+attr_latex: :font \footnotesize :float multicolumn
+| First | Second | Third | Fourth | Fifth | Sixth | Seventh | Eighth | Ninth |
+|-------+--------+-------+--------+-------+-------+---------+--------+-------|
+| A     | B      | C     | D      | E     | F     | G       | H      | I     |
+| J     | K      | L     | M      | N     | O     | P       | Q      | R     |
+
+* Figures
+
+{{{newthought(Figure placement possibilities)}}} are similar those available for tables.
+These are within the text body, within the margin and across the page.
+
+** Text Body Figure
+
+Here is an example of a figure situated in the text body.
+In this example, the ~:vertical-alignment~ LaTeX attribute is set to ~t~ to align the caption to the top of the image,
+but it can be set to ~b~ to align the caption to the bottom of the image instead.
+
+#+name: fig:text-body
+#+caption[Kaplan-Meier curve]: [[https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator][Kaplan-Meier curve]].  
+#+caption: This figure only takes up the width of the text body.
+#+caption: The caption in the margin is set to align with the top of the image.
+#+attr_latex: :vertical-alignment t
+[[file:kaplan-meier-estimator.png]]
+
+** Margin Figure
+
+Here is an example of a figure situated in the margin.
+We can control the offset to situate the margin table accordingly.
+
+#+name: fig:marginal
+#+caption[Kaplan-Meier curve]: The same Kaplan-Meier curve.
+#+caption: This figure fits in the margin.
+#+caption: An offset can be provided to adjust the position.
+#+attr_latex: :float margin :width 2in :offset -5.0in
+[[file:kaplan-meier-estimator.png]]
+
+** Full-width Figure
+
+Here is an example of a figure that is centered on the page,
+that is allowed to span up to the full width of the page.
+
+#+name: fig:full-width
+#+caption[Density plot]: This density plot shows the distribution of two random variables.
+#+caption: The figure takes up the full page width.
+#+attr_latex: :float multicolumn
+[[file:distribution-density.png]]
+
+* References
+
+As an example, here is a reference to one of Edward Tufte's books.[[tufte-ebib:10.5555/33404]]
+
+You can also do references another way, like this: see [[tufte-ebib:10.5555/33404][Tufte, Edward R. (1986)]].
+
+** ebib
+
+If you currently use ~ebib~, this document and the template documents have a default setup for it.
+
+Specifically, the file-local variables in these files define a new link type ~tufte-ebib~ that creates
+margin citations that are used in Tufte's books and handouts.
+(The technical details are that the ~tufte-ebib~ links export the reference to use the
+LaTeX ~\autocite{}~ command, for which we've set up ~biblatex~ to output to footnotes,
+which are automatically put in the margins by the ~tufte-latex~ classes.)
+
+After ~ebib~ is opened and a BibTeX file is loaded into it, the
+#+LATEX: \linebreak
+~ebib-insert-citation~ command can be used to insert ~tufte-ebib~ links.
+
+Note that ~ebib~ needs to be opened with the corresponding BibTeX file for this document
+in order to export the references.
+It should match file referenced in the ~\addbibresource~ LaTeX header at the top of this document
+source.
+
+** Directly Citing References
+
+Otherwise, references can be directly cited using the ~\cite{}~ (for in-text citations)
+and ~\autocite{}~ (for margin citations) commands.
+The bibliography keys the commands are called with should match BibTeX entry keys in the file
+loaded in the ~\addbibresource~ LaTeX header at the top of this document source.
+
+* Macros
+
+Here are some Org macros that expand to ~tufte-latex~ TeX package commands (see [[https://ctan.org/pkg/tufte-latex?lang=en][documentation]]).
+They are defined at the top of this document, and are also pre-defined in the template files.
+
+Org macros are typically used within the Org document as follows:
+#+begin_src org :eval none
+{{{macroname(arg1,arg2,...)}}}
+#+end_src
+
+The above calls the macro ~macroname~ with three arguments ~arg1~, ~arg2~, ~arg3~, and so on.
+When the value for an argument is not given, it is simply substituted with an empty string.
+
+Commas within an argument should be escaped (~\,~), for example
+
+#+begin_example
+{{{sidenote(This is a macro\, called with two args,0pt)}}}
+#+end_example
+
+** newthought
+
+{{{newthought(This macro sets the first part)}}} of the first sentence in a new section to small-caps,
+using the ~\newthought~ command in ~tufte-latex~.
+
+#+begin_src org
+,#+MACRO: newthought \newthought{$1}
+#+end_src
+
+** sidenote
+
+This macro creates a numbered sidenote{{{sidenote(This sidenote is numbered\, and has a comma.,0pt)}}},
+using the ~\sidenote~ command in ~tufte-latex~.
+
+#+begin_src org
+,#+MACRO: sidenote \sidenote[$2][$3]{$1}
+#+end_src
+
+Specifically, the macro has the following signature, where ~text~ is the sidenote text, ~offset~ is the vertical offset for the sidenote position (e.g. ~0pt~, ~1.0in~ or  ~2.0cm~), and ~number~ is an override for the sidenote number.
+Overriding the sidenote number will only change the number for that sidenote,
+and will not affect the sequence of subsequent sidenotes.
+
+#+begin_src org :eval none
+{{{sidenote(text,offset,number)}}}
+#+end_src
+
+Note that regular footnotes get translated into sidenotes even without this macro.[fn:1]
+
+#+end_example
+
+** marginnote
+
+This macro creates an unnumbered sidenote{{{marginnote(This marginnote is unnumbered.,0pt)}}},
+using the ~\marginnote~ command in ~tufte-latex~.
+
+#+begin_src org
+,#+MACRO: marginnote \marginnote[$2]{$1}
+#+end_src
+
+Specifically, the macro has the following signature, where ~text~ is the sidenote text, and ~offset~ is the vertical offset for the marginnote position (e.g. ~0pt~, ~1.0in~ or  ~2.0cm~).
+
+#+begin_src org :eval none
+{{{marginnote(text,offset)}}}
+#+end_src
+
+* Back matter                                                        :ignore:
+
+#+begin_src latex
+% Uncomment the next line to print a reference section at the end of the doc
+\printbibliography
+#+end_src
+
+* Footnotes
+
+[fn:1] Like this one. 
+
+* Document Configuration                                           :noexport:
+
+** Set Up Org Export
+
+#+NAME: tufte-latex-handout
+#+begin_src elisp :results silent
+(add-to-list
+ 'org-latex-classes
+ '("tufte-handout"
+   "\\documentclass[twoside,nobib]{tufte-handout} [NO-DEFAULT-PACKAGES]"
+   ("\\section{%s}" . "\\section*{%s}")
+   ("\\subsection{%s}" . "\\subsection*{%s}")
+   ("\\paragraph{%s}" . "\\paragraph*{%s}")))
+#+end_src
+
+** Set Up ebib
+
+#+NAME: tufte-latex-ebib-citations
+#+begin_src emacs-lisp :results silent
+(require 'cl-extra)
+(require 'cl-seq)
+(setq-local
+ ebib-citation-commands
+ (list (cons 'org-mode
+             (list
+              (cl-remove-duplicates
+               (cons '("tufte-ebib" "[[tufte-ebib:%K][%D]]")
+                     (cl-some (lambda (lst) (and (eq 'org-mode (car lst))
+                                                 (car (cdr lst))))
+                              ebib-citation-commands))
+               :test (lambda (x y) (string= (car x) (car y))))
+              ))))
+#+end_src
+
+#+NAME: tufte-latex-org-links
+#+begin_src emacs-lisp :results silent :exports none
+(defun my-org-tufte-ebib-export (path desc format)
+  "Export an ebib link.  See `org-link-parameters' for details about PATH, DESC and FORMAT."
+  (let* ((my-desc (or desc ""))
+         (desc-parts (split-string my-desc "::"))
+         (desc-name (car desc-parts))
+         (desc-pre-note (or (nth 1 desc-parts) ""))
+         (desc-post-note (mapconcat 'identity (nthcdr 2 desc-parts) "::")))
+    (cond
+     ((eq format 'latex)
+      (if desc
+          (format "%s\\autocite%s%s{%s}"
+                  (concat desc-name " ")
+                  (if (string= "" desc-pre-note) "" (format "[%s]" desc-pre-note))
+                  (if (string= "" desc-post-note) "" (format "[%s]" desc-post-note))
+                  path)
+        (format "\\autocite{%s}" path))))))
+(org-link-set-parameters "tufte-ebib"
+                         :follow #'org-ebib-open
+                         :store #'org-ebib-store-link
+                         :export #'my-org-tufte-ebib-export)
+#+end_src
+
+** Set Up Latex Keywords
+
+#+NAME: tufte-latex-keywords
+#+begin_src elisp :results silent
+(defun tufte-latex-org-kwds ()
+  "parse the buffer and return a cons list of (property . value)
+from lines like: #+PROPERTY: value"
+  (org-element-map (org-element-parse-buffer 'element) '(keyword node-property)
+                   (lambda (keyword) (cons (org-element-property :key keyword)
+                                           (org-element-property :value keyword)))))
+
+(defun tufte-latex-org-kwd (KEYWORD)
+  "get the value of a KEYWORD in the form of #+KEYWORD: value"
+  (or (cdr (assoc KEYWORD (tufte-latex-org-kwds))) ""))
+#+end_src
+
+** Set Up Compile Process
+
+#+name: pdf-process-biber
+#+header: :results silent
+#+begin_src emacs-lisp
+(setq-local org-latex-pdf-process
+      '("pdflatex -interaction nonstopmode -output-directory %o %f"
+        "biber %b"
+        "pdflatex -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -interaction nonstopmode -output-directory %o %f")))
+#+end_src
+
+** Local Variables
+
+#+begin_src org
+Local Variables:
+eval: (require 'ox-extra)
+eval: (ox-extras-activate '(latex-header-blocks ignore-headlines))
+eval: (require 'ox-tufte-latex)
+eval: (org-sbe "tufte-latex-handout")
+eval: (org-sbe "tufte-latex-ebib-citations")
+eval: (org-sbe "tufte-latex-org-links")
+eval: (org-sbe "tufte-latex-keywords")
+eval: (org-sbe "pdf-process-biber")
+End:
+#+end_src
