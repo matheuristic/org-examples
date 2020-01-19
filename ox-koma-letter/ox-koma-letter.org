@@ -1,0 +1,109 @@
+* Preamble							   :noexport:
+
+#+AUTHOR: Sender
+#+EMAIL: sender.email@some.domain.com
+#+PHONE_NUMBER: 123-123-1234
+# #+FROM_LOGO: \includegraphics{logo.png}
+# #+OPTIONS: from-logo:t phone:t email:t
+#+SUBJECT: Subject for letter goes here
+#+DATE: January 1, 1970
+
+# NOTE: Check the KOMA-Script manual to find a LCO that fits the envelope standards of your country
+#+LCO: DINmtext
+
+# NOTE: Change the order of the backletter, use smart quotes and include backaddress
+#+OPTIONS: after-closing-order:(my_after_signature ps cc encl)
+#+options: ':t backaddress:t subject:left backaddress-separator
+
+# NOTE: Remove the first header (this removes the default from-logo, phone, email, etc)
+#+LATEX_HEADER: \setkomavar{firsthead}{}
+
+#+LATEX_HEADER: \usepackage{varwidth}
+# #+LATEX_HEADER: \setkomavar{backaddressseparator}{~{$\vcenter{\hbox{\scalebox{0.5}{$\bullet$}}}$} }
+#+LATEX_HEADER: \setkomavar{backaddressseparator}{}
+#+LATEX_HEADER: \makeatletter
+#+LATEX_HEADER: \setkomavar{backaddress}{%
+# #+LATEX_HEADER: \begin{varwidth}{\useplength{toaddrwidth}}
+#+LATEX_HEADER: \begin{varwidth}{3.5in}
+#+LATEX_HEADER: {\def\\{\usekomavar{backaddressseparator}\@ogobble}%
+#+LATEX_HEADER: \raggedright\usekomavar{fromname}\linebreak\usekomavar{backaddressseparator}\usekomavar{fromaddress}}
+#+LATEX_HEADER: \end{varwidth}%
+#+LATEX_HEADER: }
+#+LATEX_HEADER: \makeatother
+#+LATEX_HEADER: \makeatletter
+#+LATEX_HEADER: \@addtoplength{backaddrheight}{2\baselineskip}
+#+LATEX_HEADER: \makeatother
+
+#+LATEX_HEADER: \usepackage{marvosym}
+
+# #+LATEX_HEADER: \renewcommand*{\raggedsignature}{\raggedright}
+# #+LATEX_HEADER: \renewcommand\raggedsignature{}
+
+* From 								       :from:
+Sender organization name, if applicable
+575 Fifth Ave, Floor 18
+New York, NY 10017
+
+* To                                                                     :to:
+# NOTE: Explicit newlines are not necessary in TO and FROM
+Recipient
+Recipient title, if applicable
+Recipient organization name, if applicable
+123 Name of Road
+City, State Zipcode
+
+* Location							   :location:
+#+LATEX_HEADER: \makeatletter
+#+LATEX_HEADER:   \@setplength{lochpos}{\oddsidemargin}
+#+LATEX_HEADER:   \@addtoplength{lochpos}{1.7in}
+#+LATEX_HEADER:   \@setplength{locvpos}{0.975in}
+#+LATEX_HEADER: \makeatother
+
+# Uncomment line below to include a logo
+# #+LATEX: \includegraphics[height=0.5in]{./logo.png}
+
+* Dear Sir/Madam,
+# NOTE: Your letter is the first non-special heading.  The title of
+# this heading may used as an opening.
+
+This is an example Org document for generating a letter using the ~scrlttr2~ class in the LaTeX KOMA-Script package via Org-mode's exporter, adapted from the example [[https://orgmode.org/worg/exporters/koma-letter-export.html#org4b0bfff][here]].
+
+Install the ~koma-script~ package using the system TeX package manager.
+Also download ~ox-koma-letter.el~ from [[https://code.orgmode.org/bzg/org-mode/raw/master/contrib/lisp/ox-koma-letter.el][here]] and make sure its directory is in Emac's ~load-path~ variable.
+
+To compile this document, use Org-mode's exporter via ~C-c C-e~ and selecting /Export with KOMA-Scrlttr2/ and the desired filetype.
+
+For more information on using ~ox-koma-letter~,  see its [[https://orgmode.org/worg/exporters/koma-letter-export.html][tutorial]].
+For more information on using the ~scrlttr2~ LaTeX class, see its documentation [[https://ctan.org/pkg/koma-script][here]].
+
+#+begin_export latex
+\renewcommand\raggedsignature{\raggedright}
+#+end_export
+
+* Yours faithfully,                                                 :closing:
+# \vspace{-0.3in}
+
+Sender
+
+Sender Title
+
+\Telefon \enskip (123) 123-1234
+
+\Letter \enskip ~author.email@some.domain.com~
+
+
+
+* COMMENT some arbitrary LaTeX code				 :my_after_signature:
+#+BEGIN_EXPORT latex
+% this special heading was added dynamically.
+#+END_EXPORT
+
+* COMMENT PS									 :ps:
+PS: "PS" is not typeset automatically by KOMA-Script
+
+
+* COMMENT Local Variables                                                  :noexport:
+Local Variables:
+eval: (require 'ox-koma-letter)
+eval: (add-to-list 'org-latex-packages-alist '("AUTO" "babel" nil))
+End:
