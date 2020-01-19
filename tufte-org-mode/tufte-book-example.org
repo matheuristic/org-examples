@@ -3,7 +3,7 @@
 #+AUTHOR: Author Name
 #+FULLNAME: Full Author Name
 #+PUBLISHER: Name of Publisher
-#+PRINT-ORDINAL: First
+#+PRINT-ORDINAL: First edition, first
 #+PRINT-DATE: January 1970
 #+COPYRIGHT-DATE: 1970
 #+WEB-SITE: http://this.is.not.a.real.site
@@ -23,9 +23,7 @@
 #+MACRO: newthought \newthought{$1}
 #+MACRO: sidenote \sidenote[$3][$2]{$1}
 #+MACRO: marginnote \marginnote[$2]{$1}
-
-# Configure the margin note font (see front matter heading)
-#+MARGIN-NOTE-FONT: \itshape\footnotesize
+#+MACRO: index \index{$1}
 
 # The configuration below uses a TeX font derived from Cardo that is similar to Bembo
 #+LATEX_HEADER: \usepackage[p,osf]{fbb}
@@ -36,11 +34,14 @@
 
 #+LATEX_HEADER: \usepackage{booktabs,graphicx,microtype,hyphenat,amsmath}
 #+LATEX_HEADER: \geometry{paperheight=10.5in,paperwidth=8.5in,textwidth=4.375in}
-#+LATEX_HEADER: \titleformat{\part}[display]{\relax\itshape\huge}{}{0pt}{\huge\rmfamily\itshape}[]
 
 # Use BibLaTeX for bibliographies and add BibTex bibliography file (modify filename as needed)
 #+LATEX_HEADER: \usepackage[backend=biber,style=verbose-trad1]{biblatex}
 #+LATEX_HEADER: \addbibresource{filename.bib}
+
+# Use imakeidx to create an index
+#+LATEX_HEADER: \usepackage{imakeidx}
+#+LATEX_HEADER: \makeindex[intoc=true]
 
 * Front matter                                                       :ignore:
 
@@ -48,11 +49,9 @@
 
 #+NAME: tufte-latex-book-settings
 #+HEADER: :var publisher=(tufte-latex-org-kwd "PUBLISHER")
-#+HEADER: :var marginnote-font=(tufte-latex-org-kwd "MARGIN-NOTE-FONT")
 #+HEADER: :results raw :exports results
 #+begin_src emacs-lisp
-(format "\\publisher{%s}
-\\setmarginnotefont{%s}" publisher marginnote-font)
+(format "#+LATEX: \\publisher{%s}" publisher)
 #+end_src
 
 ** Title page                                                        :ignore:
@@ -96,15 +95,9 @@ Copyright \\copyright\\ %s %s
 #+TOC: listings
 #+TOC: tables
 
-* Main matter
+* Main matter                                                        :ignore:
 
 #+LATEX: \mainmatter
-
-** Chapter 1
-
-** Chapter 2
-
-** Chapter N
 
 * Part
 
@@ -113,10 +106,11 @@ This is a part.
 ** Chapter
 
 This is a chapter.
+#+LATEX: \index{chapter}
 
 *** Section
 
-This is a section.
+This is a section.{{{index(section)}}}
 
 **** Subsection
 
@@ -140,9 +134,8 @@ This is a sublist item.
 \newpage
 \backmatter
 \printbibliography[heading=bibintoc,title={Bibliography}]
+\printindex
 #+end_export
-
-* Footnotes :ignore:
 
 * Document Configuration                                           :noexport:
 
@@ -163,21 +156,27 @@ This is a sublist item.
 
 ** Set Up ebib
 
-#+NAME: tufte-latex-ebib-citations
+#+NAME: tufte-latex-ebib
 #+begin_src emacs-lisp :results silent
 (require 'cl-extra)
 (require 'cl-seq)
-(setq-local
- ebib-citation-commands
- (list (cons 'org-mode
-             (list
-              (cl-remove-duplicates
-               (cons '("tufte-ebib" "[[tufte-ebib:%K][%D]]")
-                     (cl-some (lambda (lst) (and (eq 'org-mode (car lst))
-                                                 (car (cdr lst))))
-                              ebib-citation-commands))
-               :test (lambda (x y) (string= (car x) (car y))))
-              ))))
+
+(defun my-insert-tufte-ebib-org-mode-cite-command (lst)
+  "Check if LST is an `org-mode' cite command list and if so, return a modified list with tufte-ebib cite command."
+  (if (eq 'org-mode (car lst))
+      (cons (car lst)
+            (list (cl-remove-duplicates
+                   (cons '("tufte-ebib" "[[tufte-ebib:%K][%D]]")
+                         (car (cdr lst)))
+                   :test (lambda (x y) (string= (car x) (car y)))
+                   :from-end t)))
+    lst))
+
+(if (boundp 'ebib-citation-commands)
+    (setq-local
+     ebib-citation-commands
+     (mapcar 'my-insert-tufte-ebib-org-mode-cite-command
+             ebib-citation-commands)))
 #+end_src
 
 #+NAME: tufte-latex-org-links
@@ -240,7 +239,7 @@ eval: (require 'ox-extra)
 eval: (ox-extras-activate '(latex-header-blocks ignore-headlines))
 eval: (require 'ox-tufte-latex)
 eval: (org-sbe "tufte-latex-book")
-eval: (org-sbe "tufte-latex-ebib-citations")
+eval: (org-sbe "tufte-latex-ebib")
 eval: (org-sbe "tufte-latex-org-links")
 eval: (org-sbe "tufte-latex-keywords")
 eval: (org-sbe "pdf-process-biber")

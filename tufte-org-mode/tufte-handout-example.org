@@ -1,14 +1,13 @@
 #+TITLE:  Org-Tufte Handout Example
 #+SUBTITLE: Subtitle of Handout
 #+AUTHOR: Author Name
-#+DATE: January 10, 2020
-#+MARGIN-NOTE-FONT: \itshape\footnotesize
+#+DATE: January 1, 1970
 #+LATEX_CLASS: tufte-handout
 
 #+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:{} arch:headline
 #+OPTIONS: author:t c:nil creator:nil d:(not "LOGBOOK") date:t e:t
 #+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:nil
-#+OPTIONS: tags:t tasks:nil tex:t timestamp:nil title:nil toc:nil todo:t |:t
+#+OPTIONS: tags:t tasks:nil tex:t timestamp:nil title:t toc:nil todo:t |:t
 
 #+LANGUAGE: en
 #+SELECT_TAGS: export
@@ -20,9 +19,6 @@
 #+MACRO: sidenote \sidenote[$3][$2]{$1}
 #+MACRO: marginnote \marginnote[$2]{$1}
 
-# Configure the margin note font (see front matter heading)
-#+MARGIN-NOTE-FONT: \itshape\footnotesize
-
 # The configuration below uses a TeX font derived from Cardo that is similar to Bembo
 #+LATEX_HEADER: \usepackage[p,osf]{fbb}
 
@@ -32,7 +28,6 @@
 
 #+LATEX_HEADER: \usepackage{booktabs,graphicx,microtype,hyphenat,amsmath}
 #+LATEX_HEADER: \geometry{paperheight=10.5in,paperwidth=8.5in,textwidth=4.375in}
-#+LATEX_HEADER: \titleformat{\part}[display]{\relax\itshape\huge}{}{0pt}{\huge\rmfamily\itshape}[]
 
 # Use BibLaTeX for bibliographies and add BibTex bibliography file (modify filename as needed)
 #+LATEX_HEADER: \usepackage[backend=biber,style=verbose-trad1]{biblatex}
@@ -40,14 +35,7 @@
 
 * Front Matter                                                     :ignore:
 
-#+NAME: tufte-latex-handout-settings
-#+HEADER: :var marginnote-font=(tufte-latex-org-kwd "MARGIN-NOTE-FONT")
-#+HEADER: :results raw :exports results
-#+begin_src emacs-lisp
-(format "\\setmarginnotefont{%s}" marginnote-font)
-#+end_src
-
-\maketitle
+# #+LATEX: \maketitle
 
 * Section
 
@@ -73,12 +61,10 @@ This is a sublist item.
 
 #+begin_src latex
 % Uncomment the next line to print a reference section at the end of the doc
-\printbibliography
+\printbibliography[heading=bibintoc,title={Bibliography}]
 #+end_src
 
-* Footnotes :ignore:
-
-[fn:1] Like this one. 
+* Footnotes                                                          :ignore:
 
 * Document Configuration                                           :noexport:
 
@@ -97,21 +83,27 @@ This is a sublist item.
 
 ** Set Up ebib
 
-#+NAME: tufte-latex-ebib-citations
+#+NAME: tufte-latex-ebib
 #+begin_src emacs-lisp :results silent
 (require 'cl-extra)
 (require 'cl-seq)
-(setq-local
- ebib-citation-commands
- (list (cons 'org-mode
-             (list
-              (cl-remove-duplicates
-               (cons '("tufte-ebib" "[[tufte-ebib:%K][%D]]")
-                     (cl-some (lambda (lst) (and (eq 'org-mode (car lst))
-                                                 (car (cdr lst))))
-                              ebib-citation-commands))
-               :test (lambda (x y) (string= (car x) (car y))))
-              ))))
+
+(defun my-insert-tufte-ebib-org-mode-cite-command (lst)
+  "Check if LST is an `org-mode' cite command list and if so, return a modified list with tufte-ebib cite command."
+  (if (eq 'org-mode (car lst))
+      (cons (car lst)
+            (list (cl-remove-duplicates
+                   (cons '("tufte-ebib" "[[tufte-ebib:%K][%D]]")
+                         (car (cdr lst)))
+                   :test (lambda (x y) (string= (car x) (car y)))
+                   :from-end t)))
+    lst))
+
+(if (boundp 'ebib-citation-commands)
+    (setq-local
+     ebib-citation-commands
+     (mapcar 'my-insert-tufte-ebib-org-mode-cite-command
+             ebib-citation-commands)))
 #+end_src
 
 #+NAME: tufte-latex-org-links
@@ -174,7 +166,7 @@ eval: (require 'ox-extra)
 eval: (ox-extras-activate '(latex-header-blocks ignore-headlines))
 eval: (require 'ox-tufte-latex)
 eval: (org-sbe "tufte-latex-handout")
-eval: (org-sbe "tufte-latex-ebib-citations")
+eval: (org-sbe "tufte-latex-ebib")
 eval: (org-sbe "tufte-latex-org-links")
 eval: (org-sbe "tufte-latex-keywords")
 eval: (org-sbe "pdf-process-biber")
