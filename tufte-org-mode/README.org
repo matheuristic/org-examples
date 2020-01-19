@@ -109,7 +109,7 @@ and another for compiling to books (~tufte-book-template.org~).
 The Org Tufte documents can be compiled to PDF by calling
 #+LATEX: \linebreak
 ~org-export-dispatch~  and exporting to Tufte LaTeX format
-(i.e., ~C-c C-e T~ followed by the key corresponding to the target output location).
+(i.e., ~C-c C-e T~ followed by the key corresponding to the desired output).
 
 * Tufte Handout Document 
 
@@ -306,7 +306,8 @@ using the ~\newthought~ command in ~tufte-latex~.
 
 ** sidenote
 
-This macro creates a numbered sidenote{{{sidenote(This sidenote is numbered\, and has a comma.,0pt)}}},
+This macro creates a numbered sidenote
+{{{sidenote(This sidenote is numbered\, and has a comma.,0pt)}}},
 using the ~\sidenote~ command in ~tufte-latex~.
 
 #+begin_src org
@@ -323,35 +324,35 @@ and will not affect the sequence of subsequent sidenotes.
 
 Note that regular footnotes get translated into sidenotes even without this macro.[fn:1]
 
-Side notes can be italicized
+Sidenotes can be italicized by starting the ~text~ argument with the LaTeX ~\it~ command.
 {{{sidenote(\it Sidenotes can be italicized\, like this.,0pt)}}}
-by starting the ~text~ argument with the latex ~\it~ command.
-To have marginnotes italicized by default, modify the macro definition to include ~\it~ before ~$1~.
-
-#+begin_src org
-,#+MACRO: sidenote \sidenote[$2][$3]{\it $1}
-#+end_src
-
-#+end_example
+They can be similarly bolded using the ~\bf~ command.
+{{{sidenote(\bf They can also be bolded\, like this.,0pt)}}}
+It is also possible to both bold and italicize the side note.
+{{{sidenote(\bf \itshape Or both\, like this.,0pt)}}}
 
 ** marginnote
 
-This macro creates an unnumbered sidenote{{{marginnote(This marginnote is unnumbered.,0pt)}}},
-using the ~\marginnote~ command in ~tufte-latex~.
+This macro creates an unnumbered sidenote
+{{{marginnote(This marginnote is unnumbered.,0pt)}}},
+otherwise called a margin note, using the ~\marginnote~ command in ~tufte-latex~.
 
 #+begin_src org
 ,#+MACRO: marginnote \marginnote[$2]{$1}
 #+end_src
 
-Specifically, the macro has the following signature, where ~text~ is the sidenote text, and ~offset~ is the vertical offset for the marginnote position (e.g. ~0pt~, ~1.0in~ or  ~2.0cm~).
+Specifically, the macro has the following signature, where ~text~ is the margin note text,
+and ~offset~ is the vertical offset for the margin note position (e.g. ~0pt~, ~1.0in~ or  ~2.0cm~).
 
 #+begin_src org :eval none
 {{{marginnote(text,offset)}}}
 #+end_src
 
-Like sidenotes, margin notes can also be italicized by starting the ~text~ argument with the latex ~\it~ command.
-{{{marginnote(\it Marginnotes can be italicized\, like this.,0pt)}}}
-To have marginnotes italicized by default, modify the macro definition to include ~\it~ before ~$1~.
+Like sidenotes, margin notes can also be italicized{{{marginnote(\it Margin notes can be italicized\, like this.,0pt)}}},
+bolded{{{marginnote(\bf Or bolded\, like this.,0pt)}}},
+or both{{{marginnote(\bf \itshape Or both\, like this.,0pt)}}}.
+
+To italicize margin notes by default, modify the macro definition to include ~\it~ before ~$1~.
 
 #+begin_src org
 ,#+MACRO: marginnote \marginnote[$2]{\it $1}
