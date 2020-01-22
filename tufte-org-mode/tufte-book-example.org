@@ -20,10 +20,14 @@
 #+STARTUP: noinlineimages
 #+STARTUP: entitiespretty
 
-#+MACRO: newthought \newthought{$1}
-#+MACRO: sidenote \sidenote[$3][$2]{$1}
-#+MACRO: marginnote \marginnote[$2]{$1}
-#+MACRO: index \index{$1}
+# Tufte-LaTeX macros with default behavior when exporting via non-Tufte-LaTeX backend
+# See https://github.com/fniessen/org-macros for other useful macros
+#+MACRO: newthought (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\newthought{" $1 "}") (upcase $1)))
+#+MACRO: sidenote (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\sidenote[" $3 "][" $2 "]{" $1 "}") (concat "[fn::" $1 "]")))
+#+MACRO: marginnote (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\marginnote[" $2 "]{" $1 "}") (concat "[fn::" $1 "]")))
+
+#  Indexing macro, see https://orgmode.org/manual/Quoting-LaTeX-code.html
+#+MACRO: index @@latex:\index{$1}@@
 
 # The configuration below uses a TeX font derived from Cardo that is similar to Bembo
 #+LATEX_HEADER: \usepackage[p,osf]{fbb}
