@@ -9,43 +9,16 @@
 #+WEB-SITE: http://this.is.not.a.real.site
 #+LATEX_CLASS: tufte-book
 
-#+OPTIONS: ':nil *:t -:t ::t <:t H:5 \n:nil ^:{} arch:headline
-#+OPTIONS: author:t c:nil creator:nil d:(not "LOGBOOK") date:t e:t
-#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:nil
-#+OPTIONS: tags:t tasks:nil tex:t timestamp:nil title:nil toc:nil todo:t |:t
-
 #+LANGUAGE: en
-#+SELECT_TAGS: export
-#+EXCLUDE_TAGS: noexport
 #+STARTUP: noinlineimages
 #+STARTUP: entitiespretty
 
-# Tufte-LaTeX macros with default behavior when exporting via non-Tufte-LaTeX backend
-# See https://github.com/fniessen/org-macros for other useful macros
-#+MACRO: newthought (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\newthought{" $1 "}") (upcase $1)))
-#+MACRO: sidenote (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\sidenote[" $3 "][" $2 "]{" $1 "}") (concat "[fn::" $1 "]")))
-#+MACRO: marginnote (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\marginnote[" $2 "]{" $1 "}") (concat "[fn::" $1 "]")))
-
-#  Indexing macro, see https://orgmode.org/manual/Quoting-LaTeX-code.html
-#+MACRO: index @@latex:\index{$1}@@
-
-# The configuration below uses a TeX font derived from Cardo that is similar to Bembo
-#+LATEX_HEADER: \usepackage[p,osf]{fbb}
-
-# Uncomment below lines to reduce the vertical separation between list items
+# Uncomment below lines to reduce vertical separation between list items
 # #+LATEX_HEADER: \usepackage{enumitem}
 # #+LATEX_HEADER: \setlist[itemize]{noitemsep}
 
-#+LATEX_HEADER: \usepackage{booktabs,graphicx,microtype,hyphenat,amsmath}
-#+LATEX_HEADER: \geometry{paperheight=10.5in,paperwidth=8.5in,textwidth=4.375in}
-
-# Use BibLaTeX for bibliographies and add BibTex bibliography file (modify filename as needed)
-#+LATEX_HEADER: \usepackage[backend=biber,style=verbose-trad1]{biblatex}
+# Add BibTex bibliography file via BibLaTeX (modify filename as needed)
 #+LATEX_HEADER: \addbibresource{filename.bib}
-
-# Use imakeidx to create an index
-#+LATEX_HEADER: \usepackage{imakeidx}
-#+LATEX_HEADER: \makeindex[intoc=true]
 
 * Front matter                                                       :ignore:
 
@@ -58,10 +31,6 @@
 (format "#+LATEX: \\publisher{%s}" publisher)
 #+end_src
 
-** Title page                                                        :ignore:
-
-#+LATEX: \frontmatter\maketitle
-
 ** Copyright page                                                    :ignore:
 
 #+HEADER: :var right-holder=(tufte-latex-org-kwd "FULLNAME")
@@ -72,25 +41,12 @@
 #+HEADER: :var copyright-date=(tufte-latex-org-kwd "COPYRIGHT-DATE")
 #+HEADER: :results raw :exports results
 #+begin_src emacs-lisp
-(format "#+begin_export LATEX
-%% \\newpage
-\\begin{fullwidth}
-~\\vfill
-\\thispagestyle{empty}
-\\setlength{\\parindent}{0pt}
-\\setlength{\\parskip}{\\baselineskip}
-%% Work around no \copyright in the T1 encoding using lmr font OT1 encoding
-\\renewcommand*\\copyright{{%%
-  \\usefont{OT1}{lmr}{m}{n}\\textcopyright}}
-Copyright \\copyright\\ %s %s
-
-\\par\\smallcaps{Published by %s}
-
-\\par\\smallcaps{%s}
-
-\\par\\textit{%s printing, %s}
-\\end{fullwidth}
-#+end_export" copyright-date right-holder publisher web-site print-ordinal print-date)
+(org-tufte-make-copyright-page copyright-date
+                               right-holder
+                               publisher
+                               web-site
+                               print-ordinal
+                               print-date)
 #+end_src
 
 ** Lists                                                             :ignore:
@@ -141,111 +97,10 @@ This is a sublist item.
 \printindex
 #+end_export
 
-* Document Configuration                                           :noexport:
-
-** Set Up Org Export
-
-#+NAME: tufte-latex-book
-#+begin_src elisp :results silent
-(add-to-list
- 'org-latex-classes
- '("tufte-book"
-   "\\documentclass[twoside,nobib]{tufte-book} [NO-DEFAULT-PACKAGES]"
-   ("\\part{%s}" . "\\part*{%s}") ;; comment this line if book has no parts
-   ("\\chapter{%s}" . "\\chapter*{%s}")
-   ("\\section{%s}" . "\\section*{%s}")
-   ("\\subsection{%s}" . "\\subsection*{%s}")
-   ("\\paragraph{%s}" . "\\paragraph*{%s}")))
-#+end_src
-
-** Set Up ebib
-
-#+NAME: tufte-latex-ebib
-#+begin_src emacs-lisp :results silent
-(require 'cl-extra)
-(require 'cl-seq)
-
-(defun my-insert-tufte-ebib-org-mode-cite-command (lst)
-  "Check if LST is an `org-mode' cite command list and if so, return a modified list with tufte-ebib cite command."
-  (if (eq 'org-mode (car lst))
-      (cons (car lst)
-            (list (cl-remove-duplicates
-                   (cons '("tufte-ebib" "[[tufte-ebib:%K][%D]]")
-                         (car (cdr lst)))
-                   :test (lambda (x y) (string= (car x) (car y)))
-                   :from-end t)))
-    lst))
-
-(if (boundp 'ebib-citation-commands)
-    (setq-local
-     ebib-citation-commands
-     (mapcar 'my-insert-tufte-ebib-org-mode-cite-command
-             ebib-citation-commands)))
-#+end_src
-
-#+NAME: tufte-latex-org-links
-#+begin_src emacs-lisp :results silent :exports none
-(defun my-org-tufte-ebib-export (path desc format)
-  "Export an ebib link.  See `org-link-parameters' for details about PATH, DESC and FORMAT."
-  (let* ((my-desc (or desc ""))
-         (desc-parts (split-string my-desc "::"))
-         (desc-name (car desc-parts))
-         (desc-pre-note (or (nth 1 desc-parts) ""))
-         (desc-post-note (mapconcat 'identity (nthcdr 2 desc-parts) "::")))
-    (cond
-     ((eq format 'latex)
-      (if desc
-          (format "%s\\autocite%s%s{%s}"
-                  (concat desc-name " ")
-                  (if (string= "" desc-pre-note) "" (format "[%s]" desc-pre-note))
-                  (if (string= "" desc-post-note) "" (format "[%s]" desc-post-note))
-                  path)
-        (format "\\autocite{%s}" path))))))
-(org-link-set-parameters "tufte-ebib"
-                         :follow #'org-ebib-open
-                         :store #'org-ebib-store-link
-                         :export #'my-org-tufte-ebib-export)
-#+end_src
-
-** Set Up Latex Keywords
-
-#+NAME: tufte-latex-keywords
-#+begin_src elisp :results silent
-(defun tufte-latex-org-kwds ()
-  "parse the buffer and return a cons list of (property . value)
-from lines like: #+PROPERTY: value"
-  (org-element-map (org-element-parse-buffer 'element) '(keyword node-property)
-                   (lambda (keyword) (cons (org-element-property :key keyword)
-                                           (org-element-property :value keyword)))))
-
-(defun tufte-latex-org-kwd (KEYWORD)
-  "get the value of a KEYWORD in the form of #+KEYWORD: value"
-  (or (cdr (assoc KEYWORD (tufte-latex-org-kwds))) ""))
-#+end_src
-
-** Set Up Compile Process
-
-#+name: pdf-process-biber
-#+header: :results silent
-#+begin_src emacs-lisp
-(setq-local org-latex-pdf-process
-      '("pdflatex -interaction nonstopmode -output-directory %o %f"
-        "biber %b"
-        "pdflatex -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -interaction nonstopmode -output-directory %o %f")))
-#+end_src
-
-** Local Variables
+* Local Variables                                                  :noexport:
 
 #+begin_src org
 Local Variables:
-eval: (require 'ox-extra)
-eval: (ox-extras-activate '(latex-header-blocks ignore-headlines))
-eval: (require 'ox-tufte-latex)
-eval: (org-sbe "tufte-latex-book")
-eval: (org-sbe "tufte-latex-ebib")
-eval: (org-sbe "tufte-latex-org-links")
-eval: (org-sbe "tufte-latex-keywords")
-eval: (org-sbe "pdf-process-biber")
+eval: (org-tufte-minor-mode 1)
 End:
 #+end_src

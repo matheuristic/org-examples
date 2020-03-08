@@ -3,55 +3,25 @@
 #+DATE: January 18, 2020
 #+LATEX_CLASS: tufte-handout
 
-#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:{} arch:headline
-#+OPTIONS: author:t c:nil creator:nil d:(not "LOGBOOK") date:t e:t
-#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:nil
-#+OPTIONS: tags:t tasks:nil tex:t timestamp:nil title:t toc:t todo:t |:t
+#+OPTIONS: toc:t
 
 #+LANGUAGE: en
-#+SELECT_TAGS: export
-#+EXCLUDE_TAGS: noexport
 #+STARTUP: noinlineimages
 #+STARTUP: entitiespretty
 
-# Tufte-LaTeX macros with default behavior when exporting via non-Tufte-LaTeX backend
-# See https://github.com/fniessen/org-macros for other useful macros
-#+MACRO: newthought (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\newthought{" $1 "}") (upcase $1)))
-#+MACRO: sidenote (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\sidenote[" $3 "][" $2 "]{" $1 "}") (concat "[fn::" $1 "]")))
-#+MACRO: marginnote (eval (if (org-export-derived-backend-p org-export-current-backend 'tufte-latex) (concat "\\marginnote[" $2 "]{" $1 "}") (concat "[fn::" $1 "]")))
-
-# The configuration below uses a TeX font derived from Cardo that is similar to Bembo
-#+LATEX_HEADER: \usepackage[p,osf]{fbb}
-
-# Uncomment below lines to reduce the vertical separation between list items
+# Uncomment below lines to reduce vertical separation between list items
 # #+LATEX_HEADER: \usepackage{enumitem}
 # #+LATEX_HEADER: \setlist[itemize]{noitemsep}
 
-#+LATEX_HEADER: \usepackage{booktabs,graphicx,microtype,hyphenat,amsmath}
-#+LATEX_HEADER: \geometry{paperheight=10.5in,paperwidth=8.5in,textwidth=4.375in}
-
-# Use BibLaTeX for bibliographies and add BibTex bibliography file (modify filename as needed)
-#+LATEX_HEADER: \usepackage[backend=biber,style=verbose-trad1]{biblatex}
+# Add BibTex bibliography file via BibLaTeX (modify filename as needed)
 #+LATEX_HEADER: \addbibresource{tufte.bib}
 
-* Front Matter                                                     :ignore:
+* Front Matter                                                       :ignore:
 
-# #+LATEX: \maketitle
+** Table of contents                                               :noexport:
 
-** Title and table of contents options :noexport:
-
-*** Title but no table of contents
-
-Set either:
-
-1. options ~title:nil~, ~toc:nil~, and make sure ~#+LATEX: \maketitle~ above is not commented, or
-2. option ~title:t~, ~toc:nil~, and comment out ~#+LATEX: \maketitle~ above.
-
-*** Title and table of contents
-
-For the table  of contents to appear /after/ the title, set options ~title:t~, ~toc:t~, and comment out ~#+LATEX: \maketitle~ above.
-
-For the table of contents to appear /before/ the title, set options ~title:nil~, ~toc:t~, and make sure ~#+LATEX: \maketitle~ above is not commented.
+To include a table of contents when exporting the Org document,
+set options ~title:t~ in the document header.
 
 * Introduction
 
@@ -98,8 +68,10 @@ tlmgr install \
 ** Install Emacs package
 
 The Emacs package at https://github.com/tsdye/tufte-org-mode needs to be installed,
-and the directory containing ~ox-tufte-latex.el~ file be in the Emacs ~load-path~
-variable (see [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][documentation]]).
+and the directories containing ~ox-tufte-latex.el~ (from the package) and ~org-tufte.el~
+(from here) be in the Emacs ~load-path~ variable (see [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][documentation]]).
+
+Finally, ~org-tufte.el~ should be loaded via ~(require 'org-tufte)~ during startup or before using the template documents below.
 
 * Template Documents
 
@@ -362,116 +334,14 @@ To italicize margin notes by default, modify the macro definition to include ~\i
 
 * Back matter                                                        :ignore:
 
-#+begin_src latex
-% Uncomment the next line to print a reference section at the end of the doc
-\printbibliography[heading=bibintoc,title={Bibliography}]
-#+end_src
+# Uncomment the next line to print a reference section at the end of the doc
+#+LATEX: \printbibliography[heading=bibintoc,title={Bibliography}]
 
-* Document Configuration                                           :noexport:
-
-** Set Up Org Export
-
-#+NAME: tufte-latex-handout
-#+begin_src elisp :results silent
-(add-to-list
- 'org-latex-classes
- '("tufte-handout"
-   "\\documentclass[twoside,nobib]{tufte-handout} [NO-DEFAULT-PACKAGES]"
-   ("\\section{%s}" . "\\section*{%s}")
-   ("\\subsection{%s}" . "\\subsection*{%s}")
-   ("\\paragraph{%s}" . "\\paragraph*{%s}")))
-#+end_src
-
-** Set Up ebib
-
-#+NAME: tufte-latex-ebib
-#+begin_src emacs-lisp :results silent
-(require 'cl-extra)
-(require 'cl-seq)
-
-(defun my-insert-tufte-ebib-org-mode-cite-command (lst)
-  "Check if LST is an `org-mode' cite command list and if so, return a modified list with tufte-ebib cite command."
-  (if (eq 'org-mode (car lst))
-      (cons (car lst)
-            (list (cl-remove-duplicates
-                   (cons '("tufte-ebib" "[[tufte-ebib:%K][%D]]")
-                         (car (cdr lst)))
-                   :test (lambda (x y) (string= (car x) (car y)))
-                   :from-end t)))
-    lst))
-
-(if (boundp 'ebib-citation-commands)
-    (setq-local
-     ebib-citation-commands
-     (mapcar 'my-insert-tufte-ebib-org-mode-cite-command
-             ebib-citation-commands)))
-#+end_src
-
-#+NAME: tufte-latex-org-links
-#+begin_src emacs-lisp :results silent :exports none
-(defun my-org-tufte-ebib-export (path desc format)
-  "Export an ebib link.  See `org-link-parameters' for details about PATH, DESC and FORMAT."
-  (let* ((my-desc (or desc ""))
-         (desc-parts (split-string my-desc "::"))
-         (desc-name (car desc-parts))
-         (desc-pre-note (or (nth 1 desc-parts) ""))
-         (desc-post-note (mapconcat 'identity (nthcdr 2 desc-parts) "::")))
-    (cond
-     ((eq format 'latex)
-      (if desc
-          (format "%s\\autocite%s%s{%s}"
-                  (concat desc-name " ")
-                  (if (string= "" desc-pre-note) "" (format "[%s]" desc-pre-note))
-                  (if (string= "" desc-post-note) "" (format "[%s]" desc-post-note))
-                  path)
-        (format "\\autocite{%s}" path))))))
-
-(org-link-set-parameters "tufte-ebib"
-                         :follow #'org-ebib-open
-                         :store #'org-ebib-store-link
-                         :export #'my-org-tufte-ebib-export)
-#+end_src
-
-** Set Up Latex Keywords
-
-#+NAME: tufte-latex-keywords
-#+begin_src elisp :results silent
-(defun tufte-latex-org-kwds ()
-  "parse the buffer and return a cons list of (property . value)
-from lines like: #+PROPERTY: value"
-  (org-element-map (org-element-parse-buffer 'element) '(keyword node-property)
-                   (lambda (keyword) (cons (org-element-property :key keyword)
-                                           (org-element-property :value keyword)))))
-
-(defun tufte-latex-org-kwd (KEYWORD)
-  "get the value of a KEYWORD in the form of #+KEYWORD: value"
-  (or (cdr (assoc KEYWORD (tufte-latex-org-kwds))) ""))
-#+end_src
-
-** Set Up Compile Process
-
-#+name: pdf-process-biber
-#+header: :results silent
-#+begin_src emacs-lisp
-(setq-local org-latex-pdf-process
-      '("pdflatex -interaction nonstopmode -output-directory %o %f"
-        "biber %b"
-        "pdflatex -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -interaction nonstopmode -output-directory %o %f")))
-#+end_src
-
-** Local Variables
+* Local Variables                                                  :noexport:
 
 #+begin_src org
 Local Variables:
-eval: (require 'ox-extra)
-eval: (ox-extras-activate '(latex-header-blocks ignore-headlines))
-eval: (require 'ox-tufte-latex)
-eval: (org-sbe "tufte-latex-handout")
-eval: (org-sbe "tufte-latex-ebib")
-eval: (org-sbe "tufte-latex-org-links")
-eval: (org-sbe "tufte-latex-keywords")
-eval: (org-sbe "pdf-process-biber")
+eval: (org-tufte-minor-mode 1)
 End:
 #+end_src
 
