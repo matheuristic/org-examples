@@ -50,6 +50,6 @@ This is a sublist item.
 
 #+begin_src org
 Local Variables:
-eval: (org-tufte-minor-mode 1)
+eval: (org-tufte-latex-minor-mode 1)
 End:
 #+end_src

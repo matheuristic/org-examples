@@ -68,10 +68,10 @@ tlmgr install \
 ** Install Emacs package
 
 The Emacs package at https://github.com/tsdye/tufte-org-mode needs to be installed,
-and the directories containing ~ox-tufte-latex.el~ (from the package) and ~org-tufte.el~
+and the directories containing ~ox-tufte-latex.el~ (from the package) and ~org-tufte-latex.el~
 (from here) be in the Emacs ~load-path~ variable (see [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][documentation]]).
 
-Finally, ~org-tufte.el~ should be loaded via ~(require 'org-tufte)~ during startup or before using the template documents below.
+Finally, ~org-tufte-latex.el~ should be loaded via ~(require 'org-tufte)~ during startup or before using the template documents below.
 
 * Template Documents
 
@@ -341,7 +341,7 @@ To italicize margin notes by default, modify the macro definition to include ~\i
 
 #+begin_src org
 Local Variables:
-eval: (org-tufte-minor-mode 1)
+eval: (org-tufte-latex-minor-mode 1)
 End:
 #+end_src
 

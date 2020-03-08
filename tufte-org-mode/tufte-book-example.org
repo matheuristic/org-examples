@@ -3,7 +3,7 @@
 #+AUTHOR: Author Name
 #+FULLNAME: Full Author Name
 #+PUBLISHER: Name of Publisher
-#+PRINT-ORDINAL: First edition, first
+#+PRINT-ORDINAL: First edition, first printing
 #+PRINT-DATE: January 1970
 #+COPYRIGHT-DATE: 1970
 #+WEB-SITE: http://this.is.not.a.real.site
@@ -41,7 +41,7 @@
 #+HEADER: :var copyright-date=(tufte-latex-org-kwd "COPYRIGHT-DATE")
 #+HEADER: :results raw :exports results
 #+begin_src emacs-lisp
-(org-tufte-make-copyright-page copyright-date
+(org-tufte-latex-make-copyright-page copyright-date
                                right-holder
                                publisher
                                web-site
@@ -101,6 +101,6 @@ This is a sublist item.
 
 #+begin_src org
 Local Variables:
-eval: (org-tufte-minor-mode 1)
+eval: (org-tufte-latex-minor-mode 1)
 End:
 #+end_src
